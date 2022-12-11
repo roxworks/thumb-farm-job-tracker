@@ -24,7 +24,7 @@ const PROMPT_SUFFIX = '(((smiling face, happy face, face)))'
 
 const createJob = async (req: NextApiRequest, res: NextApiResponse) => {
   const jobDetails = req.body;
-  const { title, description, id, totalGenerations } = jobDetails;
+  const { title, description, id, count: totalGenerations } = jobDetails;
 
   if (!title || !description || !id || !totalGenerations) {
     return res.status(400).json({ error: "Missing title, description, totalGenerations, or id" });

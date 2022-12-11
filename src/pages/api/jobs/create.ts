@@ -27,7 +27,7 @@ const createJob = async (req: NextApiRequest, res: NextApiResponse) => {
   const { title, description, id, count: totalGenerations } = jobDetails;
 
   if (!title || !description || !id || !totalGenerations) {
-    return res.status(400).json({ error: "Missing title, description, totalGenerations, or id" });
+    return res.status(400).json({ error: "Missing title, description, count, or id" });
   }
 
 

@@ -4,6 +4,8 @@ import { prisma } from "../../../server/db/client";
 
 import * as Ably from 'ably';
 
+import axios from 'axios';
+
 const ABLY_KEY = process.env.ABLY_KEY;
 
 const options: Ably.Types.ClientOptions = { key: ABLY_KEY };
@@ -13,11 +15,53 @@ const channel = client.channels.get('ai_images'); /* inferred type Ably.Types.Re
 
 const DEFAULT_NEGATIVE_PROMPT = "multiple, text";
 
+const PROMPT_GENERATOR_URL = 'https://chat-gpt-api-ruby.vercel.app/api/chatgpt/input'
+
+const PROMPT_PREFIX = 'cpc_mrbeast style, '
+
+const PROMPT_SUFFIX = '(((smiling face, happy face, face)))'
+
+
 const createJob = async (req: NextApiRequest, res: NextApiResponse) => {
   const jobDetails = req.body;
-  const { prompts, id, totalGenerations } = jobDetails;
-  if (!prompts || !id || !totalGenerations) {
-    return res.status(400).json({ error: "Missing prompt or id" });
+  const { title, description, id, totalGenerations } = jobDetails;
+
+  if (!title || !description || !id || !totalGenerations) {
+    return res.status(400).json({ error: "Missing title, description, totalGenerations, or id" });
+  }
+
+
+  const getPrompt = async () => {
+    const res = await axios.post(PROMPT_GENERATOR_URL, {
+      title,
+      description,
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return res.data;
+  }
+
+  res.status(200).json({
+    id,
+    status: 'processing',
+    note: 'please hit /api/jobs/:id to check on the status of your job'
+  });
+
+  //generate 3 prompts
+  let prompts: string[] = [];
+
+  while (prompts.length < 3) {
+    try {
+      const prompt = await getPrompt();
+      prompts.push(`${PROMPT_PREFIX}${prompt}${PROMPT_SUFFIX}`);
+    }
+    catch (e: any) {
+      console.log(e);
+      console.log('tryin again');
+    }
   }
 
   //generate a generationId for each prompt
@@ -53,11 +97,7 @@ const createJob = async (req: NextApiRequest, res: NextApiResponse) => {
     channel.publish('generate', bodies[i]);
   }
 
-  res.status(200).json({
-    id,
-    status: 'processing',
-    note: 'please hit /api/jobs/:id to check on the status of your job'
-  });
+
 };
 
 export default createJob;

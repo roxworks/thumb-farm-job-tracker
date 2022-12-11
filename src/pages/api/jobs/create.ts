@@ -44,7 +44,7 @@ const createJob = async (req: NextApiRequest, res: NextApiResponse) => {
       negative_prompt: DEFAULT_NEGATIVE_PROMPT,
       baseId: id,
       generationId: generationIds[index],
-      count: totalGenerations / prompts.length,
+      count: totalGenerations,
     };
   });
 

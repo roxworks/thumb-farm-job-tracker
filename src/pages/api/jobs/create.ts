@@ -8,7 +8,7 @@ const ABLY_KEY = process.env.ABLY_KEY;
 
 const options: Ably.Types.ClientOptions = { key: ABLY_KEY };
 const client = new Ably.Realtime(options); /* inferred type Ably.Realtime */
-const channel = client.channels.get('feed'); /* inferred type Ably.Types.RealtimeChannel */
+const channel = client.channels.get('ai_images'); /* inferred type Ably.Types.RealtimeChannel */
 
 
 const DEFAULT_NEGATIVE_PROMPT = "multiple, text";
@@ -50,7 +50,7 @@ const createJob = async (req: NextApiRequest, res: NextApiResponse) => {
 
   for (let i = 0; i < bodies.length; i++) {
     console.log(bodies[i]);
-    channel.publish('generate', bodies);
+    channel.publish('generate', bodies[i]);
   }
 
   res.status(200).json({

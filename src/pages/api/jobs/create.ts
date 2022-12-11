@@ -51,7 +51,7 @@ const createJob = async (req: NextApiRequest, res: NextApiResponse) => {
   });
 
   //generate 3 prompts
-  let prompts: string[] = [];
+  const prompts: string[] = [];
 
   while (prompts.length < 3) {
     try {

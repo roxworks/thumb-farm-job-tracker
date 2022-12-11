@@ -37,12 +37,21 @@ const createJob = async (req: NextApiRequest, res: NextApiResponse) => {
       description,
     }, {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        "Accept-Encoding": "gzip,deflate,compress"
       }
     });
 
     return res.data;
   }
+
+  const newJob = await prisma.job.create({
+    data: {
+      prompts: [],
+      id,
+      generationIds: []
+    },
+  });
 
   res.status(200).json({
     id,
@@ -55,8 +64,10 @@ const createJob = async (req: NextApiRequest, res: NextApiResponse) => {
 
   while (prompts.length < 3) {
     try {
+      console.log('getting prompt # ' + prompts.length)
       const prompt = await getPrompt();
       prompts.push(`${PROMPT_PREFIX}${prompt}${PROMPT_SUFFIX}`);
+      console.log('saved prompt')
     }
     catch (e: any) {
       console.log(e);
@@ -69,11 +80,13 @@ const createJob = async (req: NextApiRequest, res: NextApiResponse) => {
     return `${id}-${index}`;
   });
 
-  const newJob = await prisma.job.create({
+  const updatedJob = await prisma.job.update({
+    where: {
+      id,
+    },
     data: {
       prompts,
-      id,
-      generationIds
+      generationIds,
     },
   });
 
